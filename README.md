@@ -1,97 +1,59 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+TravelBuddy ✈️
 
-# Getting Started
+Ders: Mobil Programlama
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+Proje Adı: TravelBuddy — Birlikte Gezecek Kişi Bulma Uygulaması
 
-## Step 1: Start Metro
+TravelBuddy, kullanıcıların seyahat planlarını (şehir, tarih, detaylar) paylaşarak benzer rotalara sahip diğer kullanıcılarla eşleşmesini sağlayan, React Native tabanlı bir mobil uygulamadır.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+👥 Takım Bilgileri
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Takım Üyesi 1: Asım Burak Öztürk - 22360859063
 
-```sh
-# Using npm
-npm start
+Takım Üyesi 2: Sude Çakmak - 24360859208
 
-# OR using Yarn
-yarn start
-```
+📅 İlerleme Raporu (İlk 4 Hafta)
 
-## Step 2: Build and run your app
+Proje takvimine uygun olarak ilk 4 haftalık hedefler başarıyla tamamlanmıştır.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+✅ Hafta 1-2: Kurulum ve Kimlik Doğrulama
 
-### Android
+React Native (Expo) proje iskeleti oluşturuldu.
 
-```sh
-# Using npm
-npm run android
+Firebase Authentication entegre edildi.
 
-# OR using Yarn
-yarn android
-```
+Kullanıcı Kayıt Ol (Sign Up) ve Giriş Yap (Login) ekranları kodlandı.
 
-### iOS
+Hata yönetimi (Yanlış şifre, eksik bilgi vb.) eklendi.
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+✅ Hafta 3: Profil ve Veri Tabanı Temelleri
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+Firebase Firestore veritabanı bağlantısı yapıldı.
 
-```sh
-bundle install
-```
+Profil Ekranı: Kullanıcının bilgileri veritabanından dinamik olarak çekildi.
 
-Then, and every time you update your native dependencies, run:
+Kullanıcıya Özel Listeleme: Profil sayfasında kullanıcının "Yönettiği Rotalar" ve "Katıldığı Rotalar" ayrıştırılarak listelendi.
 
-```sh
-bundle exec pod install
-```
+✅ Hafta 4: GeoDB API ve Şehir Arama (CRUD & API)
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+İlan Oluşturma Ekranı: Kullanıcıların yeni gezi ekleyebileceği form tasarlandı.
 
-```sh
-# Using npm
-npm run ios
+GeoDB Cities API Entegrasyonu: Şehir arama kısmında canlı API bağlantısı kuruldu.
 
-# OR using Yarn
-yarn ios
-```
+Risk Analizi B Planı: API kotası/hatası durumunda devreye giren hibrit (yedek) şehir veritabanı eklendi.
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Arama ve Filtreleme: Ana sayfada gezi başlığına veya oluşturana göre anlık arama özelliği eklendi.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+CRUD İşlemleri: Veri Ekleme (Create), Okuma (Read) ve Silme (Delete - Sadece kendi rotası için) fonksiyonları tamamlandı.
 
-## Step 3: Modify your app
+Etkileşim: Gezilere "Katıl" (Join) ve "Ayrıl" (Leave) özelliği eklendi.
 
-Now that you have successfully run the app, let's make changes!
+🛠️ Kullanılan Teknolojiler
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Frontend: React Native (Expo)
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+Backend: Firebase (Authentication, Firestore Database)
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+API: GeoDB Cities API (RapidAPI)
 
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Navigasyon: React Navigation (Stack)
