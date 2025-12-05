@@ -25,7 +25,7 @@ Proje takvimine uygun olarak **ilk 4 haftalık hedefler başarıyla tamamlanmı�
 
 ### ✅ Hafta 1–2: Kurulum ve Kimlik Doğrulama
 
-- React Native (Expo) proje iskeleti oluşturuldu.
+- React Native proje iskeleti oluşturuldu.
 - Firebase Authentication entegre edildi.
 - Kullanıcı **Kayıt Ol (Sign Up)** ve **Giriş Yap (Login)** ekranları geliştirildi.
 - Hata yönetimi eklendi:
@@ -59,7 +59,7 @@ Proje takvimine uygun olarak **ilk 4 haftalık hedefler başarıyla tamamlanmı�
 - **Arama ve Filtreleme**:
   - Ana sayfada gezi başlığına veya oluşturana göre
     anlık arama özelliği eklendi.
-- **CRUD İşlemleri**:
+- **İşlemler**:
   - Veri Ekleme (Create)
   - Veri Okuma (Read)
   - Veri Silme (Delete – yalnızca kendi rotası için)
