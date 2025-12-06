@@ -47,7 +47,7 @@ Proje takvimine uygun olarak **ilk 4 haftalık hedefler başarıyla tamamlanmı�
 
 ---
 
-### ✅ Hafta 4: GeoDB API ve Şehir Arama (CRUD & API)
+### ✅ Hafta 4: GeoDB API ve Şehir Arama
 
 - **İlan Oluşturma Ekranı**:
   - Kullanıcıların yeni gezi planı ekleyebileceği form tasarlandı.
