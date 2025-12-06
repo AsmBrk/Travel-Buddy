@@ -52,7 +52,7 @@ Proje takvimine uygun olarak **ilk 4 haftalık hedefler başarıyla tamamlanmı�
 - **İlan Oluşturma Ekranı**:
   - Kullanıcıların yeni gezi planı ekleyebileceği form tasarlandı.
 - **GeoDB Cities API Entegrasyonu**:
-  - Şehir arama alanında canlı API bağlantısı kuruldu.
+  - Şehir arama alanında canlı API bağlantısı kuruldu ama sonuç alınamadı ve silindi.
 - **Risk Analizi & B Planı**:
   - API kotası veya hata durumlarında devreye giren
     hibrit (yedek) şehir veritabanı eklendi.
@@ -71,11 +71,10 @@ Proje takvimine uygun olarak **ilk 4 haftalık hedefler başarıyla tamamlanmı�
 
 ## 🛠️ Kullanılan Teknolojiler
 
-- **Frontend:** React Native (Expo)
+- **Frontend:** React Native
 - **Backend:** Firebase  
   - Authentication  
   - Firestore Database
-- **API:** GeoDB Cities API (RapidAPI)
 - **Navigasyon:** React Navigation (Stack)
 
 ---
