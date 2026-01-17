@@ -18,6 +18,8 @@ const HomeScreen = ({ navigation }) => {
   const [trips, setTrips] = useState([]);      
   const [searchText, setSearchText] = useState(''); 
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   const db = getFirestore();
 
@@ -36,21 +38,80 @@ const HomeScreen = ({ navigation }) => {
         id: doc.id,
         ...doc.data()
       }));
-      setTrips(tripsList);
+
+      // Tarihi geçenleri temizle
+      const now = new Date();
+      
+      const activeTrips = tripsList.filter(trip => {
+        if (!trip.date) return false; 
+        
+        let tripDate;
+        if (trip.date.seconds) {
+           tripDate = new Date(trip.date.seconds * 1000);
+        } else {
+           tripDate = new Date(trip.date);
+        }
+
+        tripDate.setHours(23, 59, 59);
+        return tripDate >= now; 
+      });
+
+      setTrips(activeTrips); 
+      setCurrentPage(1);
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
+  const formatDate = (dateData) => {
+    if (!dateData) return '';
+    if (dateData.seconds) {
+      return new Date(dateData.seconds * 1000).toLocaleDateString('tr-TR');
+    }
+    if (dateData instanceof Date) {
+      return dateData.toLocaleDateString('tr-TR');
+    }
+    return dateData;
+  };
+
+  // ✅ BURASI GÜNCELLENDİ: ARTIK ŞEHİR İSMİNE DE BAKIYOR
   const filteredTrips = trips.filter(trip => {
     const text = searchText.toLowerCase(); 
     
+    // Veritabanında şehir ismi olmayabilir, hata vermemesi için kontrol ediyoruz (trip.city || '')
+    const city = trip.city ? trip.city.toLowerCase() : '';
+    const title = trip.title ? trip.title.toLowerCase() : '';
+    const creator = trip.creatorName ? trip.creatorName.toLowerCase() : '';
+
     return (
-      trip.title.toLowerCase().includes(text) || 
-      trip.creatorName.toLowerCase().includes(text)
+      title.includes(text) || 
+      creator.includes(text) ||
+      city.includes(text) // ✅ Şehir araması eklendi
     );
   });
+
+  const totalPages = Math.ceil(filteredTrips.length / itemsPerPage);
+  const paginatedTrips = filteredTrips.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPage = (page) => {
+    setCurrentPage(page);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -68,10 +129,13 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput 
           style={styles.searchInput} 
-          placeholder="Nereye gitmek istiyorsun?"
+          placeholder="Şehir veya gezi ara..." 
           placeholderTextColor="#999"
           value={searchText}
-          onChangeText={text => setSearchText(text)} 
+          onChangeText={text => {
+            setSearchText(text);
+            setCurrentPage(1);
+          }} 
         />
         {searchText.length > 0 && (
           <TouchableOpacity onPress={() => setSearchText('')}>
@@ -87,7 +151,7 @@ const HomeScreen = ({ navigation }) => {
         {loading ? (
           <ActivityIndicator size="large" color="#4A90E2" style={{ marginTop: 20 }} />
         ) : filteredTrips.length > 0 ? (
-          filteredTrips.map((trip) => (
+          paginatedTrips.map((trip) => (
             <TouchableOpacity 
               key={trip.id} 
               style={styles.card}
@@ -101,13 +165,15 @@ const HomeScreen = ({ navigation }) => {
               <View style={styles.cardContent}>
                 <View>
                   <Text style={styles.cardTitle}>{trip.title}</Text>
-                  <Text style={styles.cardDate}>📅 {trip.date}</Text>
+                  <Text style={styles.cardDate}>📅 {formatDate(trip.date)}</Text>
+                  {/* İstersen kartın içine şehir ismini de ufakça yazdırabilirsin */}
+                  <Text style={{fontSize: 12, color:'#999', marginTop: 2}}>📍 {trip.city}</Text>
                 </View>
                 
                 <View style={styles.cardFooter}>
                   <View style={styles.creatorInfo}>
                     <Image 
-                      source={{ uri: trip.creatorPhoto }} 
+                      source={{ uri: trip.creatorPhoto || 'https://cdn-icons-png.flaticon.com/512/149/149071.png' }} 
                       style={styles.creatorAvatar} 
                     />
                     <Text style={styles.creatorName} numberOfLines={1}>
@@ -131,9 +197,53 @@ const HomeScreen = ({ navigation }) => {
           </View>
         )}
 
+        {/* PAGINATION */}
+        {filteredTrips.length > 0 && totalPages > 1 && (
+          <View style={styles.paginationContainer}>
+            <TouchableOpacity 
+              style={[styles.paginationButton, currentPage === 1 && styles.paginationButtonDisabled]}
+              onPress={handlePreviousPage}
+              disabled={currentPage === 1}
+            >
+              <Text style={[styles.paginationButtonText, currentPage === 1 && styles.paginationButtonTextDisabled]}>← Önceki</Text>
+            </TouchableOpacity>
+
+            <View style={styles.pageNumbers}>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <TouchableOpacity
+                  key={page}
+                  style={[
+                    styles.pageNumber,
+                    currentPage === page && styles.pageNumberActive,
+                  ]}
+                  onPress={() => goToPage(page)}
+                >
+                  <Text
+                    style={[
+                      styles.pageNumberText,
+                      currentPage === page && styles.pageNumberTextActive,
+                    ]}
+                  >
+                    {page}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <TouchableOpacity 
+              style={[styles.paginationButton, currentPage === totalPages && styles.paginationButtonDisabled]}
+              onPress={handleNextPage}
+              disabled={currentPage === totalPages}
+            >
+              <Text style={[styles.paginationButtonText, currentPage === totalPages && styles.paginationButtonTextDisabled]}>Sonraki →</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <View style={{ height: 100 }} />
       </ScrollView>
 
+      {/* BOTTOM BAR */}
       <View style={styles.bottomBar}>
         <TouchableOpacity style={styles.navItem}>
           <Text style={[styles.navIcon, { color: '#4A90E2' }]}>🏠</Text>
@@ -160,6 +270,7 @@ const HomeScreen = ({ navigation }) => {
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   header: {
@@ -210,7 +321,60 @@ const styles = StyleSheet.create({
     width: 60, height: 60, borderRadius: 30, backgroundColor: '#4A90E2',
     justifyContent: 'center', alignItems: 'center',
   },
-  plusIcon: { color: '#fff', fontSize: 32, fontWeight: '300', marginTop: -2 }
+  plusIcon: { color: '#fff', fontSize: 32, fontWeight: '300', marginTop: -2 },
+  
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20,
+    gap: 10,
+  },
+  paginationButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#4A90E2',
+    borderRadius: 8,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  paginationButtonDisabled: {
+    backgroundColor: '#ddd',
+  },
+  paginationButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  paginationButtonTextDisabled: {
+    color: '#999',
+  },
+  pageNumbers: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  pageNumber: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  pageNumberActive: {
+    backgroundColor: '#4A90E2',
+    borderColor: '#4A90E2',
+  },
+  pageNumberText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333',
+  },
+  pageNumberTextActive: {
+    color: '#fff',
+  },
 });
 
 export default HomeScreen;

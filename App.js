@@ -10,6 +10,8 @@ import ProfileScreen from './src/screens/ProfileScreen';
 import EditProfileScreen from './src/screens/EditProfileScreen';
 import AddTripScreen from './src/screens/AddTripScreen'; 
 import TripDetailScreen from './src/screens/TripDetailScreen';
+import ChatScreen from './src/screens/ChatScreen';
+import EditTripScreen from './src/screens/EditTripScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +30,7 @@ const App = () => {
 
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="Profile" component={ProfileScreen} />
+          <Stack.Screen name="Chat" component={ChatScreen} options={{ headerShown: false }} />
           
           <Stack.Screen 
             name="EditProfile" 
@@ -46,6 +49,11 @@ const App = () => {
           <Stack.Screen 
   name="TripDetail" 
   component={TripDetailScreen} 
+/>
+<Stack.Screen 
+  name="EditTrip" 
+  component={EditTripScreen} 
+  options={{ headerShown: false, presentation: 'modal' }} // Aşağıdan yukarı açılsın diye modal yaptık
 />
         </Stack.Navigator>
       </NavigationContainer>

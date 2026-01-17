@@ -6,8 +6,7 @@ import {
   Image, 
   TouchableOpacity, 
   ScrollView,
-  Alert,
-  ActivityIndicator
+  Alert
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { auth } from '../firebase/firebaseConfig';
@@ -26,8 +25,26 @@ const ProfileScreen = ({ navigation }) => {
   const [createdTrips, setCreatedTrips] = useState([]); 
   const [joinedTrips, setJoinedTrips] = useState([]);   
   const [loading, setLoading] = useState(true);
+  const [currentPageCreated, setCurrentPageCreated] = useState(1);
+  const [currentPageJoined, setCurrentPageJoined] = useState(1);
+  const itemsPerPage = 5;
 
   const db = getFirestore();
+
+  // ✅ EKLENEN KISIM: Tarih Formatlama Fonksiyonu (ÇÖKMEYİ ENGELLER)
+  const formatDate = (dateData) => {
+    if (!dateData) return '';
+    // 1. Durum: Firestore Timestamp (saniye)
+    if (dateData.seconds) {
+      return new Date(dateData.seconds * 1000).toLocaleDateString('tr-TR');
+    }
+    // 2. Durum: JavaScript Date Objesi
+    if (dateData instanceof Date) {
+      return dateData.toLocaleDateString('tr-TR');
+    }
+    // 3. Durum: Zaten yazı (String) ise
+    return dateData;
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -107,11 +124,45 @@ const ProfileScreen = ({ navigation }) => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      // navigation.reset yerine replace veya navigate kullanmak daha güvenli olabilir
+      // ama senin yapında reset çalışıyorsa kalabilir.
       navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
     } catch (error) {
       Alert.alert('Hata', 'Çıkış yapılamadı.');
     }
   };
+
+  const totalPagesCreated = Math.ceil(createdTrips.length / itemsPerPage);
+  const paginatedCreatedTrips = createdTrips.slice(
+    (currentPageCreated - 1) * itemsPerPage,
+    currentPageCreated * itemsPerPage
+  );
+
+  const totalPagesJoined = Math.ceil(joinedTrips.length / itemsPerPage);
+  const paginatedJoinedTrips = joinedTrips.slice(
+    (currentPageJoined - 1) * itemsPerPage,
+    currentPageJoined * itemsPerPage
+  );
+
+  const handlePreviousPageCreated = () => {
+    if (currentPageCreated > 1) setCurrentPageCreated(currentPageCreated - 1);
+  };
+
+  const handleNextPageCreated = () => {
+    if (currentPageCreated < totalPagesCreated) setCurrentPageCreated(currentPageCreated + 1);
+  };
+
+  const goToPageCreated = (page) => setCurrentPageCreated(page);
+
+  const handlePreviousPageJoined = () => {
+    if (currentPageJoined > 1) setCurrentPageJoined(currentPageJoined - 1);
+  };
+
+  const handleNextPageJoined = () => {
+    if (currentPageJoined < totalPagesJoined) setCurrentPageJoined(currentPageJoined + 1);
+  };
+
+  const goToPageJoined = (page) => setCurrentPageJoined(page);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -138,7 +189,7 @@ const ProfileScreen = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Yönettiğim Rotalar ({createdTrips.length})</Text>
           {createdTrips.length > 0 ? (
-            createdTrips.map((trip) => (
+            paginatedCreatedTrips.map((trip) => (
               <View key={trip.id} style={styles.tripCardWrapper}>
                 <TouchableOpacity 
                   style={styles.tripCard}
@@ -147,7 +198,8 @@ const ProfileScreen = ({ navigation }) => {
                   <Image source={{ uri: trip.image }} style={styles.tripImage} />
                   <View style={styles.tripInfo}>
                     <Text style={styles.tripTitle}>{trip.title}</Text>
-                    <Text style={styles.tripDate}>{trip.date}</Text>
+                    {/* ✅ DÜZELTİLDİ: Tarih formatlama eklendi */}
+                    <Text style={styles.tripDate}>{formatDate(trip.date)}</Text>
                   </View>
                   <View style={styles.badge}>
                     <Text style={styles.badgeText}>Yönetici 👑</Text>
@@ -165,12 +217,50 @@ const ProfileScreen = ({ navigation }) => {
           ) : (
             <Text style={styles.emptyText}>Henüz rota oluşturmadınız.</Text>
           )}
+          
+          {/* Pagination Created Trips */}
+          {createdTrips.length > 0 && totalPagesCreated > 1 && (
+            <View style={styles.paginationContainer}>
+              <TouchableOpacity 
+                style={[styles.paginationButton, currentPageCreated === 1 && styles.paginationButtonDisabled]}
+                onPress={handlePreviousPageCreated}
+                disabled={currentPageCreated === 1}
+              >
+                <Text style={[styles.paginationButtonText, currentPageCreated === 1 && styles.paginationButtonTextDisabled]}>← Önceki</Text>
+              </TouchableOpacity>
+
+              <View style={styles.pageNumbers}>
+                {Array.from({ length: totalPagesCreated }, (_, i) => i + 1).map((page) => (
+                  <TouchableOpacity
+                    key={page}
+                    style={[
+                      styles.pageNumber,
+                      currentPageCreated === page && styles.pageNumberActive,
+                    ]}
+                    onPress={() => goToPageCreated(page)}
+                  >
+                    <Text style={[styles.pageNumberText, currentPageCreated === page && styles.pageNumberTextActive]}>
+                      {page}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <TouchableOpacity 
+                style={[styles.paginationButton, currentPageCreated === totalPagesCreated && styles.paginationButtonDisabled]}
+                onPress={handleNextPageCreated}
+                disabled={currentPageCreated === totalPagesCreated}
+              >
+                <Text style={[styles.paginationButtonText, currentPageCreated === totalPagesCreated && styles.paginationButtonTextDisabled]}>Sonraki →</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Katıldığım Rotalar ({joinedTrips.length})</Text>
           {joinedTrips.length > 0 ? (
-            joinedTrips.map((trip) => (
+            paginatedJoinedTrips.map((trip) => (
               <TouchableOpacity 
                 key={trip.id} 
                 style={styles.tripCardWrapper} 
@@ -180,7 +270,8 @@ const ProfileScreen = ({ navigation }) => {
                   <Image source={{ uri: trip.image }} style={styles.tripImage} />
                   <View style={styles.tripInfo}>
                     <Text style={styles.tripTitle}>{trip.title}</Text>
-                    <Text style={styles.tripDate}>{trip.date}</Text>
+                    {/* ✅ DÜZELTİLDİ: Tarih formatlama eklendi */}
+                    <Text style={styles.tripDate}>{formatDate(trip.date)}</Text>
                     <Text style={styles.creatorNameSub}>👤 {trip.creatorName}</Text>
                   </View>
                   <View style={[styles.badge, { backgroundColor: '#e1ffe1' }]}>
@@ -191,6 +282,44 @@ const ProfileScreen = ({ navigation }) => {
             ))
           ) : (
             <Text style={styles.emptyText}>Başka bir geziye katılmadınız.</Text>
+          )}
+          
+          {/* Pagination Joined Trips */}
+          {joinedTrips.length > 0 && totalPagesJoined > 1 && (
+            <View style={styles.paginationContainer}>
+              <TouchableOpacity 
+                style={[styles.paginationButton, currentPageJoined === 1 && styles.paginationButtonDisabled]}
+                onPress={handlePreviousPageJoined}
+                disabled={currentPageJoined === 1}
+              >
+                <Text style={[styles.paginationButtonText, currentPageJoined === 1 && styles.paginationButtonTextDisabled]}>← Önceki</Text>
+              </TouchableOpacity>
+
+              <View style={styles.pageNumbers}>
+                {Array.from({ length: totalPagesJoined }, (_, i) => i + 1).map((page) => (
+                  <TouchableOpacity
+                    key={page}
+                    style={[
+                      styles.pageNumber,
+                      currentPageJoined === page && styles.pageNumberActive,
+                    ]}
+                    onPress={() => goToPageJoined(page)}
+                  >
+                    <Text style={[styles.pageNumberText, currentPageJoined === page && styles.pageNumberTextActive]}>
+                      {page}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <TouchableOpacity 
+                style={[styles.paginationButton, currentPageJoined === totalPagesJoined && styles.paginationButtonDisabled]}
+                onPress={handleNextPageJoined}
+                disabled={currentPageJoined === totalPagesJoined}
+              >
+                <Text style={[styles.paginationButtonText, currentPageJoined === totalPagesJoined && styles.paginationButtonTextDisabled]}>Sonraki →</Text>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
 
@@ -285,7 +414,60 @@ const styles = StyleSheet.create({
     width: 60, height: 60, borderRadius: 30, backgroundColor: '#4A90E2', 
     justifyContent: 'center', alignItems: 'center' 
   },
-  plusIcon: { color: '#fff', fontSize: 32, fontWeight: '300', marginTop: -2 }
+  plusIcon: { color: '#fff', fontSize: 32, fontWeight: '300', marginTop: -2 },
+  
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 20,
+    gap: 10,
+  },
+  paginationButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#4A90E2',
+    borderRadius: 8,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  paginationButtonDisabled: {
+    backgroundColor: '#ddd',
+  },
+  paginationButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  paginationButtonTextDisabled: {
+    color: '#999',
+  },
+  pageNumbers: {
+    flexDirection: 'row',
+    gap: 5,
+  },
+  pageNumber: {
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  pageNumberActive: {
+    backgroundColor: '#4A90E2',
+    borderColor: '#4A90E2',
+  },
+  pageNumberText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#333',
+  },
+  pageNumberTextActive: {
+    color: '#fff',
+  },
 });
 
 export default ProfileScreen;
